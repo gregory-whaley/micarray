@@ -1,0 +1,94 @@
+;
+;
+;  I2S interface for two channel (stereo) microphone at 48000 sps each channel at 24 bits per sample.
+;
+;  by G. Whaley
+;  21 Oct 2025
+;
+;
+;  Set up a single state machine to clock out the bit clock (BCLK) and word clock (LRCLK)
+;  and read the data bit in, shift to assemble a 24 bit value, and place it in the FIFO.
+;  The microphones are the Invensense ICS-43434 MEMS microphone configured as a left-right
+;  stereo pair.  The microphone requires clocking 32 bits per sample word even though 
+;  the microphone delivers only 24 bits.  The trailing 8 bits are undefined.  The assembled
+;  word is autopushed to the FIFO and will have the msb on bit 31, the lsb on bit 8, and bits
+;  0-7 undefined.  Elsewhere, the code reading the buffers will perform a signed arithmetic 
+;  divide by 256 to clear bits 0-7 and maintain the 2's complement value.
+;
+;  The bit rate of the BCLK and data input bit is 48kHz * 32 * 2 = 3072 kHz.
+;  The PIO instruction rate will have 2 instructions per BCLK cycle so the PIO rate will
+;  be 6144 kHz.
+;
+;  The state machine will use Autopush with a threshold count of 32 bits.  Since the
+;  I2S protocol presents the msb first, the shift direction in the input shift register
+;  will be left.  The FIFO will have alternating left and right channel samples, each
+;  sample 32 bits wide.  By stereo audio convention, the left channel is number zero,
+;  so left channel sample 32 bit word will be first in the FIFO.
+;  
+;  | 31 - 24 | 23 - 16 | 15 - 8  |  7 - 0  |
+;  | msb                     lsb | undef   |
+;
+;  The BCLK and LRCLK are configured for outputs and use the sideset operator.
+;  The I2S standard is for LRCLK=high for right channel audio.
+;  The DATA pin is configured as an input and mapped to the input shift register.
+;  The DATA pin has the pull-down resistor enabled.
+;  The FIFO is configured as a double length input buffer.
+;
+;
+;
+.program i2s_mic
+.side_set 2
+;
+;                            |---  LRCLK
+;                            |/--  BCLK             ; data bit is latched on the rising edge of BCLK
+l_loop:           ;          ||                     ; these two instructions toggle the BCLK while leaving the LRCLK low (left channel)
+    in pins, 1        side 0b01                     ; load the data bit into the ISR and shift one left
+    jmp x-- l_loop    side 0b00                     ; loop 32=31+1 times total accommodating the 1 bit "lag" in the I2S protocol
+    in pins, 1        side 0b11                     ; Last bit fills 32bit word, LRCLK is now high for right channel r_loop.
+;                                                   ; The ISR is now full and autopull loads the word into the FIFO.
+    set x, 30         side 0b10                     ; now load the count register for the right channel 
+;
+r_loop:
+    in pins, 1        side 0b11
+    jmp x-- r_loop    side 0b10
+    in pins, 1        side 0b01
+
+public entry_point:                                 ; 
+    set x, 30         side 0b00                     ; This is the entry point for the pio preparing for the left-channel word,
+                                                    ; loading 30 into the counter and setting LRCLK low for left channel and BCLK low.
+                                                    ; state machine automatically wraps to beginning at l_loop.
+
+
+% c-sdk {
+
+// this function sets up the GPIO output, and configures the SM for one input pin and two output pins
+
+void i2s_mic_program_init(PIO pio, uint sm, uint offset, uint data_pin, uint clock_pin_base) {
+
+    pio_sm_config sm_config = i2s_mic_program_get_default_config(offset);
+    
+    sm_config_set_in_pin_base(&sm_config, data_pin);                    // set the GPIO pin number for the input bit
+    sm_config_set_in_pin_count(&sm_config,1);                           // set one pin for input data
+
+    sm_config_set_sideset_pin_base(&sm_config, clock_pin_base);         // configure GPIO pins as 2 sideset outputs
+    sm_config_set_sideset (&sm_config, 2, false, false);
+
+    sm_config_set_in_shift(&sm_config, false, true, 1);                 // set input pins to feed input shift register, shifing left, autopushing, and one bit of data 
+    sm_config_set_fifo_join(&sm_config, PIO_FIFO_JOIN_RX);              // set input FIFO as 8 words deep
+
+    uint32_t pin_dir_mask = (3u << clock_pin_base);                     //  create 32bit mask with clock_pin bits set as outputs
+    uint32_t enable_mask = (1u << data_pin) | (3u << clock_pin_base);   //  a separate mask for the bit enable using input and output pins.
+    pio_sm_set_pindirs_with_mask(pio, sm, pin_dir_mask, enable_mask);   //  set the pin directions using the mask
+
+    pio_sm_set_pins_with_mask (pio, sm, 0, pin_dir_mask);               //  initialize the output clock pins to zero to start
+
+
+    pio_sm_init(pio, sm, offset, &sm_config);                           //  load the state machine configuration parameters
+                                                                        //  being sure to include the base program offset and the additional entry point location when called
+    pio_sm_exec(pio, sm, true);
+
+    //pio_sm_exec(pio, sm, pio_encode_jmp(offset + audio_i2s_offset_entry_point));        
+   
+   
+}
+%}
