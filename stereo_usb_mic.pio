@@ -73,7 +73,7 @@ void i2s_mic_program_init(PIO pio, uint sm, uint offset, uint data_pin, uint clo
     sm_config_set_sideset_pin_base(&sm_config, clock_pin_base);         // configure GPIO pins as 2 sideset outputs
     sm_config_set_sideset (&sm_config, 2, false, false);
 
-    sm_config_set_in_shift(&sm_config, false, true, 1);                 // set input pins to feed input shift register, shifing left, autopushing, and one bit of data 
+    sm_config_set_in_shift(&sm_config, false, true, 32);                // set input pins to feed input shift register, shifing left, autopushing, shift 32 times before autopushing to FIFO
     sm_config_set_fifo_join(&sm_config, PIO_FIFO_JOIN_RX);              // set input FIFO as 8 words deep
 
     uint32_t pin_dir_mask = (3u << clock_pin_base);                     //  create 32bit mask with clock_pin bits set as outputs
@@ -82,13 +82,12 @@ void i2s_mic_program_init(PIO pio, uint sm, uint offset, uint data_pin, uint clo
 
     pio_sm_set_pins_with_mask (pio, sm, 0, pin_dir_mask);               //  initialize the output clock pins to zero to start
 
+    pio_sm_init(pio, sm, offset, &sm_config);                           //  load the state machine configuration parameters, and set the program counter to the beginning
 
-    pio_sm_init(pio, sm, offset, &sm_config);                           //  load the state machine configuration parameters
-                                                                        //  being sure to include the base program offset and the additional entry point location when called
-    pio_sm_exec(pio, sm, true);
-
-    //pio_sm_exec(pio, sm, pio_encode_jmp(offset + audio_i2s_offset_entry_point));        
+                                                                        
+    pio_sm_exec(pio, sm, pio_encode_jmp(offset + audio_i2s_offset_entry_point));        // call a single jmp instruction to the address of offset+entry_point to set the program counter to the entry point of the pio
    
+//  note the pio_sm_set_enabled() function to start the pio will wait until the intr and dma are set up.
    
 }
 %}
