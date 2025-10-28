@@ -41,7 +41,7 @@ pico_set_program_name(stereo_usb_mic "stereo_usb_mic")
 pico_set_program_version(stereo_usb_mic "0.1")
 
 # Generate PIO header
-pico_generate_pio_header(stereo_usb_mic ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
+pico_generate_pio_header(stereo_usb_mic ${CMAKE_CURRENT_LIST_DIR}/stereo_mic_i2s.pio)
 
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(stereo_usb_mic 1)
@@ -59,6 +59,7 @@ target_include_directories(stereo_usb_mic PRIVATE
 # Add any user requested libraries
 target_link_libraries(stereo_usb_mic 
         hardware_pio
+        hardware_dma
         )
 
 pico_add_extra_outputs(stereo_usb_mic)

@@ -85,7 +85,7 @@ void i2s_mic_program_init(PIO pio, uint sm, uint offset, uint data_pin, uint clo
     pio_sm_init(pio, sm, offset, &sm_config);                           //  load the state machine configuration parameters, and set the program counter to the beginning
 
                                                                         
-    pio_sm_exec(pio, sm, pio_encode_jmp(offset + audio_i2s_offset_entry_point));        // call a single jmp instruction to the address of offset+entry_point to set the program counter to the entry point of the pio
+    pio_sm_exec(pio, sm, pio_encode_jmp(offset + i2s_mic_offset_entry_point));        // call a single jmp instruction to the address of offset+entry_point to set the program counter to the entry point of the pio
    
 //  note the pio_sm_set_enabled() function to start the pio will wait until the intr and dma are set up.
    
