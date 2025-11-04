@@ -22,7 +22,7 @@ const struct microphone_config mic_config = {
 
 int main()
 {
-    int decimate_factor = 0;
+    uint decimate_factor = 0;
 
     stdio_init_all();
 
@@ -34,7 +34,10 @@ int main()
     while (true) {
         while (sample_buffer_ready == 0) { tight_loop_contents(); }            // sample_buffer_ready changes in the background and is volatile
 
-        if (decimate_factor % 100 == 0) printf("%10d   %10d\n",raw_dma_buffer[0],raw_dma_buffer[1]);
+        if (decimate_factor % 100 == 0) 
+            for (int i=0; i< SAMPLE_BUFFER_SIZE; i++){
+                printf("%10d    %10d   %10d\n",i,sample_buffer[i][0],sample_buffer[i][1]);
+            }
         decimate_factor++;
         sample_buffer_ready = false;
 

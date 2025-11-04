@@ -6,7 +6,7 @@ G. Whaley
 
 */
 
-
+#include <stdio.h>
 #include "pico/stdlib.h"              // declares a uint among other things
 #include "hardware/pio.h"
 #include "hardware/gpio.h"
@@ -18,25 +18,12 @@ G. Whaley
 #define SAMPLE_BUFFER_SIZE 48               // number of stored samples of each channel
 #define SAMPLE_RATE 48000                   //  fixed sample rate for this microphone in Hz
 
-
-/*
-Notes for activation of hardware:
-    claim a PIO, 0 or 1
-    claim a state machine 0-3
-    call the init helper routine from the .pio file
-    set the sm clock divider
-    initialize the dma buffers and initialize the dma hardware to run
-    enable the interrupt hardware
-    pio_sm_set_enabled(pio, sm, true);                      // enable the state machine to start executing.
-*/
-
 struct microphone_config {                 // struct to contain hardware choices for connecting the I2S interface
     uint gpio_data;                         // GPIO pin for the I2S DAT signal
     uint gpio_clk;                          // GPIO pin for the I2S CLK signal
     PIO  pio;                                // PIO instance to use
     uint pio_sm;                            // PIO State Machine instance to use
 };
-
 
 
 /*
@@ -67,28 +54,9 @@ The INTS register holds status for all possible interrupts, the dma irq being on
 one of them.  So the status bit can be masked to test for an interrupt status
 and the bit written to clear the status once the service routine is called.
 
-There are two independent interrupt systems, 0 and 1.
-
 After a dma transfer is completed and an interrupt is triggered, the dma
 write address and count need updating to a new buffer location and the dma
 triggered again.
-
-Sequence of calls:
-    dma_chan = dma_claim_unused_channel(true);                      // get the dma channel
-    dma_channel_config c = dma_channel_get_default_config(dma_chan);            // obtain all the channel defaults
-    channel_config_set_transfer_data_size(&c, DMA_SIZE_32);                     // set the transfer size
-    channel_config_set_read_increment(&c, false);                               // set for no read increment
-    channel_config_set_dreq(&c, DREQ_PIO0_RX0);                                 // set for DREQ pacing on the input FIFO
-    dma_channel_set_irq0_enabled(dma_chan, true);                               // set the dma complete to call irq0
-    irq_set_exclusive_handler(DMA_IRQ_0, my_dma_handler);                       // Configure the processor to run dma_handler() when DMA IRQ 0 is asserted
-    irq_set_enabled(DMA_IRQ_0, true);
-    dma_channel_configure();                                                    // call to configure the hardware with the c struct parameters but don't yet start the dma
-    my_dma_handler();                                                           // Manually call the interrupt handler once, to trigger the first transfer
-
-The interrupt handler will:
-    clear the int status bit
-    reload the dma write and transfer count for a new empty buffer and re-trigger the dma
-    tell the consumer that a full buffer is ready to read.
 
 */
 
@@ -97,24 +65,18 @@ volatile uint sample_buffer_ready = false;
 volatile int raw_dma_buffer[SAMPLE_BUFFER_SIZE*2];                                           // storage for interleaved FIFO data
 int dma_chan;
 
-
-
 // routine to manage the two raw data buffers into which the dma will copy raw data from the FIFO.
 // it is set to be called when the irq0 is triggered upon the dma transfer complete event.
 void my_dma_handler(){
-
     dma_hw->ints0 = (1u << dma_chan);                   // ack the interrupt by writing a mask to the status register
-    dma_channel_transfer_to_buffer_now(dma_chan,raw_dma_buffer,SAMPLE_BUFFER_SIZE*2);   // set the dma to transfer another block, assume buffer is empty
 
     for(int i = 0; i < SAMPLE_BUFFER_SIZE; i++){          // copy interleaved raw data to sample buffer while shifting 8 bits
-        sample_buffer[i][0] = raw_dma_buffer[i*2] / 256;
-        sample_buffer[i][1] = raw_dma_buffer[i*2+1] / 256;
+        sample_buffer[i][0] = raw_dma_buffer[i*2]/256;
+        sample_buffer[i][1] = raw_dma_buffer[i*2+1]/256;
     }
     sample_buffer_ready = true;
-
+    dma_channel_transfer_to_buffer_now(dma_chan,raw_dma_buffer,SAMPLE_BUFFER_SIZE*2);   // set the dma to transfer another block, assume buffer is empty
 };
-
-
 
 
 void i2s_microphone_init(struct microphone_config config ) {
@@ -129,6 +91,7 @@ void i2s_microphone_init(struct microphone_config config ) {
     dma_channel_config c = dma_channel_get_default_config(dma_chan);            // obtain all the channel default parameters
     channel_config_set_transfer_data_size(&c, DMA_SIZE_32);                     // set the transfer size = 32 bits (4 bytes)
     channel_config_set_read_increment(&c, false);                               // set for no read increment
+    channel_config_set_write_increment(&c,true);                                // set for write address increment after each write to dma memory
     channel_config_set_dreq(&c, DREQ_PIO0_RX0);                                 // set for DREQ pacing on the input FIFO
     dma_channel_configure(dma_chan, &c, &raw_dma_buffer,
          &config.pio->rxf[config.pio_sm], SAMPLE_BUFFER_SIZE*2, false);  // take the dma config parms and load them into hardware, false=don't start dma yet
@@ -140,6 +103,7 @@ void i2s_microphone_init(struct microphone_config config ) {
 
 void i2s_microphone_start(struct microphone_config config) {
     //  launches the hardware running with an initially empty buffer
+    dma_channel_transfer_to_buffer_now(dma_chan,raw_dma_buffer,SAMPLE_BUFFER_SIZE*2);   // set the dma to transfer another block, assume buffer is empty
     dma_channel_start(dma_chan);          //  enable the dma hardware enable bit.
     pio_sm_set_enabled(config.pio,config.pio_sm,true);
 };
