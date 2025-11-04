@@ -6,8 +6,8 @@
 
 */
 
-#include <stdio.h>
 
+#include <stdio.h>
 #include "pico/stdlib.h"
 #include "stereo_mic_i2s.c"
 
@@ -16,19 +16,27 @@ const struct microphone_config mic_config = {
     .gpio_clk = 3,                          // GPIO pin for the I2S CLK signal
     .pio = pio0,                            // PIO instance to use
     .pio_sm = 0,                            // PIO State Machine instance to use
-    .sample_rate = 48000,                   //  fixed sample rate for this microphone in Hz
-    .sample_buffer_size = 256,              //  sample buffer is two column array of signed 32 bit ints.
 };
 
 
 
 int main()
 {
+    int decimate_factor = 0;
+
     stdio_init_all();
 
+    printf("Starting...\n");
+
+    i2s_microphone_init(mic_config);
+    i2s_microphone_start(mic_config);
 
     while (true) {
-        printf("Hello, world!\n");
-        sleep_ms(1000);
+        while (sample_buffer_ready == 0) { tight_loop_contents(); }            // sample_buffer_ready changes in the background and is volatile
+
+        if (decimate_factor % 100 == 0) printf("%10d   %10d\n",raw_dma_buffer[0],raw_dma_buffer[1]);
+        decimate_factor++;
+        sample_buffer_ready = false;
+
     }
 };

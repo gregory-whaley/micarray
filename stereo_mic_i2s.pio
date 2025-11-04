@@ -62,16 +62,23 @@ public entry_point:                                 ;
 % c-sdk {
 
 // this function sets up the GPIO output, and configures the SM for one input pin and two output pins
-
+#define CLK_FREQ_KHZ (float)6144
 void i2s_mic_program_init(PIO pio, uint sm, uint offset, uint data_pin, uint clock_pin_base) {
 
     pio_sm_config sm_config = i2s_mic_program_get_default_config(offset);
-    
+ 
+    pio_sm_set_consecutive_pindirs(pio, sm, data_pin, 1, false);
+    pio_gpio_init(pio, data_pin);
     sm_config_set_in_pin_base(&sm_config, data_pin);                    // set the GPIO pin number for the input bit
     sm_config_set_in_pin_count(&sm_config,1);                           // set one pin for input data
+    gpio_pull_down(data_pin);
 
+    pio_gpio_init(pio,clock_pin_base);                                  // set the pio to claim the GPIO pin as output
+    pio_gpio_init(pio,clock_pin_base+1);    
     sm_config_set_sideset_pin_base(&sm_config, clock_pin_base);         // configure GPIO pins as 2 sideset outputs
     sm_config_set_sideset (&sm_config, 2, false, false);
+    float div = clock_get_hz(clk_sys) / (1000.0*CLK_FREQ_KHZ);                 // set the pio clock divider to 6144kHz
+    sm_config_set_clkdiv(&sm_config, div);
 
     sm_config_set_in_shift(&sm_config, false, true, 32);                // set input pins to feed input shift register, shifing left, autopushing, shift 32 times before autopushing to FIFO
     sm_config_set_fifo_join(&sm_config, PIO_FIFO_JOIN_RX);              // set input FIFO as 8 words deep
