@@ -71,7 +71,7 @@ void i2s_mic_program_init(PIO pio, uint sm, uint offset, uint data_pin, uint clo
     pio_gpio_init(pio, data_pin);
     sm_config_set_in_pin_base(&sm_config, data_pin);                    // set the GPIO pin number for the input bit
     sm_config_set_in_pin_count(&sm_config,1);                           // set one pin for input data
-    gpio_pull_up(data_pin);
+    gpio_pull_down(data_pin);
 
     pio_gpio_init(pio,clock_pin_base);                                  // set the pio to claim the GPIO pin as output
     pio_gpio_init(pio,clock_pin_base+1);    

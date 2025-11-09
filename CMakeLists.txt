@@ -35,7 +35,12 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(stereo_usb_mic stereo_usb_mic.c )
+add_executable(stereo_usb_mic
+    stereo_usb_mic.c
+    usb_mic_callbacks.c
+    usb_descriptors.c
+)
+
 
 pico_set_program_name(stereo_usb_mic "stereo_usb_mic")
 pico_set_program_version(stereo_usb_mic "0.1")
@@ -48,19 +53,25 @@ pico_enable_stdio_uart(stereo_usb_mic 1)
 pico_enable_stdio_usb(stereo_usb_mic 0)
 
 # Add the standard library to the build
-target_link_libraries(stereo_usb_mic
-        pico_stdlib)
+target_link_libraries(stereo_usb_mic PUBLIC
+        pico_stdlib
+        tinyusb_device
+        tinyusb_board
+        hardware_dma 
+        hardware_pio         
+)
 
 # Add the standard include files to the build
 target_include_directories(stereo_usb_mic PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
+
 )
 
 # Add any user requested libraries
-target_link_libraries(stereo_usb_mic 
-        hardware_pio
-        hardware_dma
-        )
+# target_link_libraries(stereo_usb_mic INTERFACE
+#         hardware_pio
+#         hardware_dma
+#         )
 
 pico_add_extra_outputs(stereo_usb_mic)
 

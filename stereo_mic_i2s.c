@@ -60,7 +60,7 @@ triggered again.
 
 */
 
-volatile int sample_buffer[SAMPLE_BUFFER_SIZE][2];                                       // left channel is index 0, right is index 1
+int sample_buffer[SAMPLE_BUFFER_SIZE][2];                                       // left channel is index 0, right is index 1
 volatile uint sample_buffer_ready = false;
 volatile int raw_dma_buffer[SAMPLE_BUFFER_SIZE*2];                                           // storage for interleaved FIFO data
 int dma_chan;
