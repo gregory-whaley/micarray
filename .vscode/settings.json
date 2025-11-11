@@ -41,6 +41,7 @@
         "clocks.h": "c",
         "format": "c",
         "pio.h": "c",
-        "gpio.h": "c"
+        "gpio.h": "c",
+        "stdlib.h": "c"
     }
 }

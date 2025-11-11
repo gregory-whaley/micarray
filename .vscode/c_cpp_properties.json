@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${userHome}/.pico-sdk/sdk/2.2.0/**",
-                "/home/greg/.pico-sdk/sdk/2.2.0/src/rp2_common/hardware_dma/include"
+                "/home/greg/.pico-sdk/sdk/2.2.0/**"
             ],
             "forcedInclude": [
                 "${workspaceFolder}/build/generated/pico_base/pico/config_autogen.h",

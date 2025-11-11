@@ -5,13 +5,14 @@
  * 
  */
 
-#ifndef _USB_MICROPHONE_H_
-#define _USB_MICROPHONE_H_
+#ifndef _USB_MIC_CALLBACKS_H_
+#define _USB_MIC_CALLBACKS_H_
 
+#include "tusb_config.h"
 #include "tusb.h"
 
 #ifndef SAMPLE_RATE
-#define SAMPLE_RATE ((CFG_TUD_AUDIO_EP_SZ_IN / 2) - 1) * 1000
+#define SAMPLE_RATE ((CFG_TUD_AUDIO_EP_SZ_IN / 8) - 1) * 1000
 #endif
 
 #ifndef SAMPLE_BUFFER_SIZE
