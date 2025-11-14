@@ -34,8 +34,8 @@ uint32_t sampFreq;        // sample frequency in Hz
 // Range states
 audio_control_range_4_n_t(1) sampleFreqRng; 						// Sample frequency range state
 
-static usb_microphone_tx_ready_handler_t usb_microphone_tx_ready_handler = NULL;
-volatile bool usb_buffer_ready = false;
+//static usb_microphone_tx_ready_handler_t usb_microphone_tx_ready_handler = NULL;
+//volatile bool usb_buffer_ready = false;
 
 void usb_microphone_init() {
   tusb_init();
@@ -48,22 +48,22 @@ void usb_microphone_init() {
   sampleFreqRng.subrange[0].bRes = 0;
 }
 
-void usb_microphone_set_tx_ready_handler(usb_microphone_tx_ready_handler_t handler)
-{
-  usb_microphone_tx_ready_handler = handler;
-}
 
 uint16_t usb_microphone_write(const void * data, uint16_t len)
 {
-  return tud_audio_write ((uint8_t *)data, len);  // note that len is a byte count.  
+   tud_audio_write((uint8_t *)data, len);  // note that len is a byte count.  
   // tusb assumes data is in proper PCM format of number of bytes per sample (1,2,4) 
   // and channel interleaving (e.g. L, R, L, R... in the case of 2 chan stereo)
 }
 
-void usb_microphone_task()
+/* 
+void usb_microphone_set_tx_ready_handler(usb_microphone_tx_ready_handler_t handler)
 {
-  tud_task();
+  usb_microphone_tx_ready_handler = handler;
 }
+*/
+
+
 
 //--------------------------------------------------------------------+
 // Application Callback API Implementations
@@ -97,6 +97,7 @@ bool tud_audio_set_req_itf_cb(uint8_t rhport, tusb_control_request_t const * p_r
   // We do not support any set range requests here, only current value requests
   TU_VERIFY(p_request->bRequest == AUDIO_CS_REQ_CUR);
 
+  TU_LOG2("        AC specific interface set request\r\n");
   // Page 91 in UAC2 specification
   uint8_t channelNum = TU_U16_LOW(p_request->wValue);
   uint8_t ctrlSel = TU_U16_HIGH(p_request->wValue);
@@ -156,6 +157,7 @@ bool tud_audio_get_req_ep_cb(uint8_t rhport, tusb_control_request_t const * p_re
   uint8_t channelNum = TU_U16_LOW(p_request->wValue);
   uint8_t ctrlSel = TU_U16_HIGH(p_request->wValue);
   uint8_t ep = TU_U16_LOW(p_request->wIndex);
+  TU_LOG2("    AC specific get request for EP: %d",ep);
 
   (void) channelNum; (void) ctrlSel; (void) ep;
 
@@ -270,6 +272,8 @@ bool tud_audio_get_req_entity_cb(uint8_t rhport, tusb_control_request_t const * 
   return false; 	// Yet not implemented
 }
 
+//   this is only needed if hardware FIFOs are not used.
+/* 
 bool tud_audio_tx_done_pre_load_cb(uint8_t rhport, uint8_t itf, uint8_t ep_in, uint8_t cur_alt_setting)
 {
   (void) rhport;
@@ -285,6 +289,7 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport, uint8_t itf, uint8_t ep_in, u
   return true;
 }
 
+ */
 bool tud_audio_tx_done_post_load_cb(uint8_t rhport, uint16_t n_bytes_copied, uint8_t itf, uint8_t ep_in, uint8_t cur_alt_setting)
 {
   (void) rhport;

@@ -10,6 +10,7 @@
 
 #include "tusb_config.h"
 #include "tusb.h"
+//#include "audio_device.h"
 
 #ifndef SAMPLE_RATE
 #define SAMPLE_RATE ((CFG_TUD_AUDIO_EP_SZ_IN / 8) - 1) * 1000
@@ -24,7 +25,7 @@ typedef void (*usb_microphone_tx_ready_handler_t)(void);
 extern volatile bool usb_buffer_ready;
 
 void usb_microphone_init();
-void usb_microphone_set_tx_ready_handler(usb_microphone_tx_ready_handler_t handler);
+//void usb_microphone_set_tx_ready_handler(usb_microphone_tx_ready_handler_t handler);
 void usb_microphone_task();
 uint16_t usb_microphone_write(const void * data, uint16_t len);
 

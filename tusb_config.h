@@ -97,13 +97,19 @@ extern "C" {
 // microphone channels.  TUSB only has prototype definitions for 1 and 4 channels, 
 // so the 2 channel definitions are here.
 
+#define TUD_AUDIO_DESC_FEATURE_UNIT_TWO_CHANNEL_MUTEONLY_LEN (6+(2+1)*4)
+#define TUD_AUDIO_DESC_FEATURE_UNIT_TWO_CHANNEL_MUTEONLY(_unitid, _srcid, _ctrlch0master, _ctrlch1, _ctrlch2, _stridx) \
+		TUD_AUDIO_DESC_FEATURE_UNIT_TWO_CHANNEL_MUTEONLY_LEN, TUSB_DESC_CS_INTERFACE, AUDIO_CS_AC_INTERFACE_FEATURE_UNIT, _unitid, _srcid, U32_TO_U8S_LE(_ctrlch0master), U32_TO_U8S_LE(_ctrlch1), U32_TO_U8S_LE(_ctrlch2), _stridx
+
+
+
 #define TUD_AUDIO_MIC_TWO_CH_DESC_LEN (TUD_AUDIO_DESC_IAD_LEN\
   + TUD_AUDIO_DESC_STD_AC_LEN\
   + TUD_AUDIO_DESC_CS_AC_LEN\
   + TUD_AUDIO_DESC_CLK_SRC_LEN\
   + TUD_AUDIO_DESC_INPUT_TERM_LEN\
   + TUD_AUDIO_DESC_OUTPUT_TERM_LEN\
-  + TUD_AUDIO_DESC_FEATURE_UNIT_TWO_CHANNEL_LEN\
+  + TUD_AUDIO_DESC_FEATURE_UNIT_TWO_CHANNEL_MUTEONLY_LEN\
   + TUD_AUDIO_DESC_STD_AS_INT_LEN\
   + TUD_AUDIO_DESC_STD_AS_INT_LEN\
   + TUD_AUDIO_DESC_CS_AS_INT_LEN\
@@ -125,7 +131,7 @@ extern "C" {
   /* Output Terminal Descriptor(4.7.2.5) */\
   TUD_AUDIO_DESC_OUTPUT_TERM(/*_termid*/ 0x03, /*_termtype*/ AUDIO_TERM_TYPE_USB_STREAMING, /*_assocTerm*/ 0x01, /*_srcid*/ 0x02, /*_clkid*/ 0x04, /*_ctrl*/ 0x0000, /*_stridx*/ 0x00),\
   /* Feature Unit Descriptor(4.7.2.8) */\
-  TUD_AUDIO_DESC_FEATURE_UNIT_TWO_CHANNEL(/*_unitid*/ 0x02, /*_srcid*/ 0x01, /*_ctrlch0master*/ AUDIO_CTRL_RW << AUDIO_FEATURE_UNIT_CTRL_MUTE_POS, /*_ctrlch1*/ AUDIO_CTRL_NONE, /*_ctrlch2*/ AUDIO_CTRL_NONE, /*_stridx*/ 0x00),\
+  TUD_AUDIO_DESC_FEATURE_UNIT_TWO_CHANNEL_MUTEONLY(/*_unitid*/ 0x02, /*_srcid*/ 0x01, /*_ctrlch0master*/ AUDIO_CTRL_RW << AUDIO_FEATURE_UNIT_CTRL_MUTE_POS, /*_ctrlch1*/ AUDIO_CTRL_NONE, /*_ctrlch2*/ AUDIO_CTRL_NONE, /*_stridx*/ 0x00),\
   /* Standard AS Interface Descriptor(4.9.1) */\
   /* Interface 1, Alternate 0 - default alternate setting with 0 bandwidth */\
   TUD_AUDIO_DESC_STD_AS_INT(/*_itfnum*/ (uint8_t)((_itfnum)+1), /*_altset*/ 0x00, /*_nEPs*/ 0x00, /*_stridx*/ 0x00),\
