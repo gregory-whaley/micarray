@@ -71,8 +71,8 @@ void my_dma_handler(){
     dma_hw->ints0 = (1u << dma_chan);                   // ack the interrupt by writing a mask to the status register
 
     for(int i = 0; i < I2S_SAMPLE_BUFFER_SIZE; i++){          // copy interleaved raw data to sample buffer while shifting 8 bits
-        sample_buffer[i][0] = raw_dma_buffer[i*2]/256;
-        sample_buffer[i][1] = raw_dma_buffer[i*2+1]/256;
+        sample_buffer[i][0] = raw_dma_buffer[i*2];
+        sample_buffer[i][1] = raw_dma_buffer[i*2+1];
     }
     sample_buffer_ready = true;
     dma_channel_transfer_to_buffer_now(dma_chan,raw_dma_buffer,I2S_SAMPLE_BUFFER_SIZE*2);   // set the dma to transfer another block, assume buffer is empty
