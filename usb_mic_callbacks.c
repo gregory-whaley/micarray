@@ -308,3 +308,24 @@ bool tud_audio_set_itf_close_EP_cb(uint8_t rhport, tusb_control_request_t const 
 
   return true;
 }
+
+/* 
+void tud_audio_feedback_params_cb(uint8_t func_id, uint8_t alt_itf, audio_feedback_params_t *feedback_param) {
+  (void) func_id;
+  (void) alt_itf;
+  // Set feedback method to fifo counting
+  feedback_param->method = AUDIO_FEEDBACK_METHOD_FIFO_COUNT;
+  feedback_param->sample_freq = SAMPLE_RATE;
+
+  // About FIFO threshold:
+  //
+  // By default the threshold is set to half FIFO size, which works well in most cases,
+  // you can reduce the threshold to have less latency.
+  //
+  // For example, here we could set the threshold to 2 ms of audio data, as audio_task() read audio data every 1 ms,
+  // having 2 ms threshold allows some margin and a quick response:
+  //
+  // feedback_param->fifo_count.fifo_threshold =
+  //    SAMPLE_RATE * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX / 1000 * 2;
+}
+ */

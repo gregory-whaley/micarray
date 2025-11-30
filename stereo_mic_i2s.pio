@@ -63,6 +63,7 @@ public entry_point:                                 ;
 
 // this function sets up the GPIO output, and configures the SM for one input pin and two output pins
 #define CLK_FREQ_KHZ (float)6144
+
 void i2s_mic_program_init(PIO pio, uint sm, uint offset, uint data_pin, uint clock_pin_base) {
 
     pio_sm_config sm_config = i2s_mic_program_get_default_config(offset);
