@@ -158,7 +158,6 @@ extern "C" {
 #define CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX                            2                                       // Driver gets this info from the descriptors - we define it here to use it to setup the descriptors and to do calculations with it below - be aware: for different number of channels you need another descriptor!
 #define CFG_TUD_AUDIO_EP_SZ_IN                                        (48 + 1) * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX      // 48 Samples (48 kHz) x 4 Bytes/Sample x 2 Channels
 #define CFG_TUD_AUDIO_FUNC_1_EP_IN_SZ_MAX                             CFG_TUD_AUDIO_EP_SZ_IN                  // Maximum EP IN size for all AS alternate settings used
-//#define CFG_TUD_AUDIO_FUNC_1_EP_IN_SW_BUF_SZ                          CFG_TUD_AUDIO_EP_SZ_IN
 #define CFG_TUD_AUDIO_FUNC_1_EP_IN_SW_BUF_SZ                          4 * CFG_TUD_AUDIO_FUNC_1_EP_IN_SZ_MAX
 
 #ifdef __cplusplus

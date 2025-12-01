@@ -1,8 +1,6 @@
 /* 
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 Ha Thach (tinyusb.org)
- *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -52,7 +50,7 @@ tusb_desc_device_t const desc_device =
     .bDeviceProtocol    = MISC_PROTOCOL_IAD,
     .bMaxPacketSize0    = CFG_TUD_ENDPOINT0_SIZE,
 
-    .idVendor           = 0xCafe,
+    .idVendor           = 0x2E8A,    // raspberry pi Ltd.
     .idProduct          = USB_PID,
     .bcdDevice          = 0x0100,
 
@@ -119,9 +117,9 @@ char const* string_desc_arr [] =
 {
     (const char[]) { 0x09, 0x04 }, 	// 0: is supported language is English (0x0409)
     "WhaleyGroup",                   	// 1: Manufacturer
-    "SoS_Mic",              		// 2: Product
-    "123456",                      	// 3: Serials, should use chip ID
-    "UAC2",                 	 	// 4: Audio Interface
+    "MicArray",              		      // 2: Product
+    "0000001",                      	// 3: Serials, should use chip ID
+    "UAC2",                 	 	      // 4: Audio Interface
 };
 
 static uint16_t _desc_str[32];

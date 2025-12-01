@@ -1,7 +1,6 @@
 /* 
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Reinhard Panhuber
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,9 +33,6 @@ uint32_t sampFreq;        // sample frequency in Hz
 // Range states
 audio20_control_range_4_n_t(1) sampleFreqRng; 						// Sample frequency range state
 
-//static usb_microphone_tx_ready_handler_t usb_microphone_tx_ready_handler = NULL;
-//volatile bool usb_buffer_ready = false;
-
 void usb_microphone_init() {
   tusb_init();
 
@@ -55,13 +51,6 @@ uint16_t usb_microphone_write(const void * data, uint16_t len)
   // tusb assumes data is in proper PCM format of number of bytes per sample (1,2,4) 
   // and channel interleaving (e.g. L, R, L, R... in the case of 2 chan stereo)
 }
-
-/* 
-void usb_microphone_set_tx_ready_handler(usb_microphone_tx_ready_handler_t handler)
-{
-  usb_microphone_tx_ready_handler = handler;
-}
-*/
 
 
 
@@ -132,11 +121,8 @@ bool tud_audio_set_req_entity_cb(uint8_t rhport, tusb_control_request_t const * 
       case AUDIO20_FU_CTRL_MUTE:
         // Request uses format layout 1
         TU_VERIFY(p_request->wLength == sizeof(audio20_control_cur_1_t));
-
         mute = ((audio20_control_cur_1_t*) pBuff)->bCur;
-
         TU_LOG2("    Set Mute: %d of channel: %u\r\n", mute, channelNum);
-
       return true;
 
         // Unknown/Unsupported control
@@ -160,8 +146,7 @@ bool tud_audio_get_req_ep_cb(uint8_t rhport, tusb_control_request_t const * p_re
   TU_LOG2("    AC specific get request for EP: %d",ep);
 
   (void) channelNum; (void) ctrlSel; (void) ep;
-
-  //	return tud_control_xfer(rhport, p_request, &tmp, 1);
+//	return tud_control_xfer(rhport, p_request, &tmp, 1);
 
   return false; 	// Yet not implemented
 }
@@ -177,7 +162,6 @@ bool tud_audio_get_req_itf_cb(uint8_t rhport, tusb_control_request_t const * p_r
   uint8_t itf = TU_U16_LOW(p_request->wIndex);
 
   TU_LOG2("Interface %d requested ",itf);
-
   (void) channelNum; (void) ctrlSel; (void) itf;
 
   return false; 	// Yet not implemented
@@ -230,8 +214,7 @@ bool tud_audio_get_req_entity_cb(uint8_t rhport, tusb_control_request_t const * 
       	TU_LOG2("    Get Mute of channel: %u\r\n", channelNum);
 	      return tud_control_xfer(rhport, p_request, &mute, 1);
 
-
-	// Unknown/Unsupported control
+// Unknown/Unsupported control
 	  default: TU_BREAKPOINT(); return false;
     }
   }
@@ -272,24 +255,7 @@ bool tud_audio_get_req_entity_cb(uint8_t rhport, tusb_control_request_t const * 
   return false; 	// Yet not implemented
 }
 
-//   this is only needed if hardware FIFOs are not used.
-/* 
-bool tud_audio_tx_done_pre_load_cb(uint8_t rhport, uint8_t itf, uint8_t ep_in, uint8_t cur_alt_setting)
-{
-  (void) rhport;
-  (void) itf;
-  (void) ep_in;
-  (void) cur_alt_setting;
 
-  if (usb_microphone_tx_ready_handler)
-  {
-    usb_microphone_tx_ready_handler();
-  }
-
-  return true;
-}
-
- */
 bool tud_audio_tx_done_post_load_cb(uint8_t rhport, uint16_t n_bytes_copied, uint8_t itf, uint8_t ep_in, uint8_t cur_alt_setting)
 {
   (void) rhport;
@@ -309,23 +275,3 @@ bool tud_audio_set_itf_close_EP_cb(uint8_t rhport, tusb_control_request_t const 
   return true;
 }
 
-/* 
-void tud_audio_feedback_params_cb(uint8_t func_id, uint8_t alt_itf, audio_feedback_params_t *feedback_param) {
-  (void) func_id;
-  (void) alt_itf;
-  // Set feedback method to fifo counting
-  feedback_param->method = AUDIO_FEEDBACK_METHOD_FIFO_COUNT;
-  feedback_param->sample_freq = SAMPLE_RATE;
-
-  // About FIFO threshold:
-  //
-  // By default the threshold is set to half FIFO size, which works well in most cases,
-  // you can reduce the threshold to have less latency.
-  //
-  // For example, here we could set the threshold to 2 ms of audio data, as audio_task() read audio data every 1 ms,
-  // having 2 ms threshold allows some margin and a quick response:
-  //
-  // feedback_param->fifo_count.fifo_threshold =
-  //    SAMPLE_RATE * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX / 1000 * 2;
-}
- */
