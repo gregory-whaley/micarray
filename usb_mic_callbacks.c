@@ -33,6 +33,8 @@ uint32_t sampFreq;        // sample frequency in Hz
 // Range states
 audio20_control_range_4_n_t(1) sampleFreqRng; 						// Sample frequency range state
 
+const int muted_buffer[(CFG_TUD_AUDIO_EP_SZ_IN)/4] = {0};     // array of zeros to send if mute is active
+
 void usb_microphone_init() {
   tusb_init();
 
@@ -42,14 +44,21 @@ void usb_microphone_init() {
   sampleFreqRng.subrange[0].bMin = SAMPLE_RATE;
   sampleFreqRng.subrange[0].bMax = SAMPLE_RATE;
   sampleFreqRng.subrange[0].bRes = 0;
+
+  mute = false;
 }
 
 
-uint16_t usb_microphone_write(const void * data, uint16_t len)
+void usb_microphone_write(const void * data, uint16_t len)
 {
-   tud_audio_write((uint8_t *)data, len);  // note that len is a byte count.  
+  if (mute) {
+    tud_audio_write((uint8_t *)muted_buffer, len);
+  }
+  else {
+    tud_audio_write((uint8_t *)data, len);  // note that len is a byte count.  
   // tusb assumes data is in proper PCM format of number of bytes per sample (1,2,4) 
   // and channel interleaving (e.g. L, R, L, R... in the case of 2 chan stereo)
+  }
 }
 
 

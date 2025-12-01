@@ -21,8 +21,9 @@ typedef void (*usb_microphone_tx_ready_handler_t)(void);
 
 extern volatile bool usb_buffer_ready;
 
+
 void usb_microphone_init();
 void usb_microphone_task();
-uint16_t usb_microphone_write(const void * data, uint16_t len);
+void usb_microphone_write(const void * data, uint16_t len);
 
 #endif

@@ -19,6 +19,8 @@ const struct microphone_config mic_config = {
     .pio_sm = 0,                            // PIO State Machine instance to use
 };
 
+
+
 int main()
 {
     stdio_init_all();
@@ -32,7 +34,7 @@ int main()
             tud_task();                         // spend most time here polling for usb tasks
         }  
         //  we have a i2s buffer full to process    
-        (void) usb_microphone_write(sample_buffer, sizeof(sample_buffer));  // Write local buffer to the USB microphone
+        usb_microphone_write(sample_buffer, sizeof(sample_buffer));  // Write local buffer to the USB microphone
                                                                     // sample_buffer is array of interleaved 32bit ints.
                                                                     // size is number of bytes.
         sample_buffer_ready = false;
