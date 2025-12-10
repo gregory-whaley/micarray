@@ -11,6 +11,7 @@
 #include "pico/stdlib.h"
 #include "stereo_mic_i2s.c"
 #include "usb_mic_callbacks.h"
+#include "hardware/adc.h"
 
 const struct microphone_config mic_config = {
     .gpio_data = 2,                         // GPIO pin for the I2S DAT signal
@@ -19,6 +20,12 @@ const struct microphone_config mic_config = {
     .pio_sm = 0,                            // PIO State Machine instance to use
 };
 
+int decimate = 0;
+float temp_C;
+
+float read_temperature() {
+    return 27.0-((adc_read()*3.28/4096.0)-0.706)*581.0;
+}
 
 
 int main()
@@ -28,6 +35,9 @@ int main()
     i2s_microphone_init(mic_config);
     i2s_microphone_start(mic_config);
     usb_microphone_init();
+    adc_init();
+    adc_select_input(4);                              //  chan 4 is the internal temperature sensor
+    adc_set_temp_sensor_enabled(true);
 
     while (true) {
         while (sample_buffer_ready == 0) {     // sample_buffer_ready changes in the background and is volatile
@@ -38,6 +48,11 @@ int main()
                                                                     // sample_buffer is array of interleaved 32bit ints.
                                                                     // size is number of bytes.
         sample_buffer_ready = false;
+
+        // decimate++;
+        // if (decimate % 1000 == 0){
+        //     printf("ADC = %f\r\n",read_temperature());
+        // }
     }
 };
 

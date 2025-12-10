@@ -39,6 +39,7 @@ pico_sdk_init()
 add_executable(stereo_usb_mic
     stereo_usb_mic.c
     usb_mic_callbacks.c
+    usb_mic_callbacks.h
     usb_descriptors.c
 )
 
@@ -59,7 +60,8 @@ target_link_libraries(stereo_usb_mic PUBLIC
         tinyusb_device
         tinyusb_board
         hardware_dma 
-        hardware_pio         
+        hardware_pio    
+        hardware_adc     
 )
 
 # Add the standard include files to the build
