@@ -24,6 +24,8 @@
 
 #include "usb_mic_callbacks.h"
 
+extern uint8_t const desc_hid_report[];
+
 // Audio controls
 // Current states       values to report to host when requested
 bool mute; 						// for master channel
@@ -66,6 +68,10 @@ void usb_microphone_write(const void * data, uint16_t len)
 //--------------------------------------------------------------------+
 // Application Callback API Implementations
 //--------------------------------------------------------------------+
+
+
+//  The audio class callback procedures 
+
 
 // Invoked when audio class specific set request received for an EP
 bool tud_audio_set_req_ep_cb(uint8_t rhport, tusb_control_request_t const * p_request, uint8_t *pBuff)
@@ -283,4 +289,63 @@ bool tud_audio_set_itf_close_EP_cb(uint8_t rhport, tusb_control_request_t const 
 
   return true;
 }
+
+//--------------------------------------------------------------------+
+// USB HID
+//--------------------------------------------------------------------+
+//  The HID class-specific callback procedures
+
+
+
+// Invoked when received GET HID REPORT DESCRIPTOR
+// Application return pointer to descriptor
+// Descriptor contents must exist long enough for transfer to complete
+uint8_t const * tud_hid_descriptor_report_cb(uint8_t itf)
+{
+  (void) itf;
+  return desc_hid_report;
+}
+
+
+int16_t read_temperature() {
+  return (int16_t)100.0*(27.0-((adc_read()*3.28/4096.0)-0.706)*581.0);          // convert adc reading to degrees C * 100
+}
+
+const int16_t mic_dist_mm = 400;                                              // returns the mic spacing in mm
+
+
+// Invoked when received GET_REPORT control request
+// Application must fill buffer report's content and return its length.
+// Return zero will cause the stack to STALL request
+uint16_t tud_hid_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer, uint16_t reqlen)
+{
+  int16_t response;
+
+  if (report_id == 1) {                   //  report ID 1 is the only supported report
+    response =  read_temperature();
+    *(buffer) = (char)(response & 0xFF);    // write the byte portions to the buffer pointer location
+    *(buffer+1) = (char)(response >> 8);    //  LSB first, then MSB
+    *(buffer+2) = (char)(mic_dist_mm & 0xFF);
+    *(buffer+3) = (char)(mic_dist_mm >> 8);
+  }
+
+  (void) itf;
+  (void) report_type;
+  (void) reqlen;
+  return 4;                                 // 4 bytes of data copied to buffer
+}
+
+
+// Invoked when received SET_REPORT control request or
+// received data on OUT endpoint ( Report ID = 0, Type = 0 )
+void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
+{
+  
+  (void) itf;
+  (void) report_id;
+  (void) report_type;
+  (void) buffer;
+
+}
+
 

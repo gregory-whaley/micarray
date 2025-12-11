@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 Ha Thach (tinyusb.org)
+ * 
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,6 @@
  *
  */
 
-//#include "/home/greg/pico/tinyusb/src/device/usbd.h"
 #ifndef _TUSB_CONFIG_H_
 #define _TUSB_CONFIG_H_
 
@@ -81,9 +80,10 @@ extern "C" {
 #endif
 
 //------------- CLASS -------------//
+//  The following shows the number of interfaces for each class.
 #define CFG_TUD_CDC               0
 #define CFG_TUD_MSC               0
-#define CFG_TUD_HID               0
+#define CFG_TUD_HID               1
 #define CFG_TUD_MIDI              0
 #define CFG_TUD_AUDIO             1
 #define CFG_TUD_VENDOR            0
