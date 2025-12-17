@@ -1,6 +1,8 @@
 /* 
  * The MIT License (MIT)
  *
+ * Copyright (C) 2025 The Whaley Group
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -51,7 +53,7 @@ tusb_desc_device_t const desc_device =
     .bMaxPacketSize0    = CFG_TUD_ENDPOINT0_SIZE,
 
     .idVendor           = 0x2E8A,    // raspberry pi Ltd.
-    .idProduct          = USB_PID,
+    .idProduct          = 0x10F6,     // allocated by raspberry pi ltd.
     .bcdDevice          = 0x0100,
 
     .iManufacturer      = 0x01,
