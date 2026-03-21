@@ -56,7 +56,7 @@ tusb_desc_device_t const desc_device =
     .idProduct          = 0x10F6,     // allocated by raspberry pi ltd.
     .bcdDevice          = 0x0100,
 
-    .iManufacturer      = 0x01,
+    .iManufacturer      = 0x01,  // string pointers
     .iProduct           = 0x02,
     .iSerialNumber      = 0x03,
 
@@ -159,7 +159,7 @@ char const* string_desc_arr [] =
     (const char[]) { 0x09, 0x04 }, 	// 0: is supported language is English (0x0409)
     "WhaleyGroup",                   	// 1: Manufacturer
     "MicArray",              		      // 2: Product
-    "0000001",                      	// 3: Serials, should use chip ID
+    "0000005",                      	// 3: Serials, should use chip ID
     "UAC2",                 	 	      // 4: Audio Interface
 };
 

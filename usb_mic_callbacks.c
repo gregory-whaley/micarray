@@ -309,10 +309,10 @@ uint8_t const * tud_hid_descriptor_report_cb(uint8_t itf)
 
 
 int16_t read_temperature() {
-  return (int16_t)100.0*(27.0-((adc_read()*3.28/4096.0)-0.706)*581.0);          // convert adc reading to degrees C * 100
+  return (int16_t)100.0*(27.0-((adc_read()*3.00/4096.0)-0.706)*581.0);          // convert adc reading to degrees C * 100
 }
 
-const int16_t mic_dist_mm = 400;                                              // returns the mic spacing in mm
+const int16_t mic_dist_mm = 390;                                              // returns the mic spacing in mm
 
 
 // Invoked when received GET_REPORT control request
