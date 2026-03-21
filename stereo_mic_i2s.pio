@@ -67,23 +67,32 @@
 .side_set 2
 ;
 ;                            |---  LRCLK
-;                            |/--  BCLK             ; data bit is latched on the rising edge of BCLK
-l_loop:           ;          ||                     ; these two instructions toggle the BCLK while leaving the LRCLK low (left channel)
-    in pins, 1        side 0b01                     ; load the data bit into the ISR and shift one left
-    jmp x-- l_loop    side 0b00                     ; loop 32=31+1 times total accommodating the 1 bit "lag" in the I2S protocol
-    in pins, 1        side 0b11                     ; Last bit fills 32bit word, LRCLK is now high for right channel r_loop.
+;                            |/--  BCLK             ; I2S data bit is latched on the rising edge of BCLK
+entry_point:      ;          ||                     ; This is the entry point for the pio preparing for the left-channel word,
+;                            ||                     ; 
+    nop               side 0b00                     ; this nop sets the LRCLK with proper lead time before the left channel MSB
+    nop               side 0b01                     ; This is a nop taking the place of the LSB input of the preceeding 32bit word.
+    set x, 29         side 0b00                     ; Once only, prepare for the next word MSB.
+;
+l_loop:                                             ; 
+    in pins, 1        side 0b01                     ; load the data bit into the ISR and shift one left.  First time thru the loop is the MSB.
+    jmp x-- l_loop    side 0b00                     ; 
+;
+    in pins, 1        side 0b01                     ; get LSB+1 bit
+    nop               side 0b10                     ; prep LRCLK for next (right) channel
+    in pins, 1        side 0b11                     ; Last bit (LSB) fills left channel 32bit word.
 ;                                                   ; The ISR is now full and autopull loads the word into the FIFO.
-    set x, 30         side 0b10                     ; now load the count register for the right channel 
+    set x, 29         side 0b10                     ; now load the count register for the right channel 
 ;
 r_loop:
-    in pins, 1        side 0b11
+    in pins, 1        side 0b11                     ;  first time thru is right channel MSB.
     jmp x-- r_loop    side 0b10
-    in pins, 1        side 0b01
-
-public entry_point:                                 ; 
-    set x, 30         side 0b00                     ; This is the entry point for the pio preparing for the left-channel word,
-                                                    ; loading 30 into the counter and setting LRCLK low for left channel and BCLK low.
-                                                    ; state machine automatically wraps to beginning at l_loop.
+;
+    in pins, 1        side 0b11                     ; get LSB+1 bit
+    set x, 29         side 0b00                     ; change LRCLK state for next channel and reload x register for left channel
+    in pins, 1        side 0b01                     ; get right channel LSB.
+;
+    jmp l_loop        side 0b00                     ; following instruction is left channel MSB input.
 
 
 % c-sdk {
@@ -117,12 +126,12 @@ void i2s_mic_program_init(PIO pio, uint sm, uint offset, uint data_pin, uint clo
 
     pio_sm_set_pins_with_mask (pio, sm, 0, pin_dir_mask);               //  initialize the output clock pins to zero to start
 
+
+
     pio_sm_init(pio, sm, offset, &sm_config);                           //  load the state machine configuration parameters, and set the program counter to the beginning
 
-                                                                        
-    pio_sm_exec(pio, sm, pio_encode_jmp(offset + i2s_mic_offset_entry_point));        // call a single jmp instruction to the address of offset+entry_point to set the program counter to the entry point of the pio
-   
-//  note the pio_sm_set_enabled() function to start the pio will wait until the intr and dma are set up.
+    pio_sm_set_enabled(pio, sm, true);                                  //  note the pio_sm_set_enabled() function to start the pio will wait 
+                                                                        //  until the intr and dma are set up.
    
 }
 %}

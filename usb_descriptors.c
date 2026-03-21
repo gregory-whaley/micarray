@@ -53,7 +53,7 @@ tusb_desc_device_t const desc_device =
     .bMaxPacketSize0    = CFG_TUD_ENDPOINT0_SIZE,
 
     .idVendor           = 0x2E8A,    // raspberry pi Ltd.
-    .idProduct          = 0x10F6,     // allocated by raspberry pi ltd.
+    .idProduct          = 0x10F6,     // allocated to Whaley Group by raspberry pi ltd.
     .bcdDevice          = 0x0100,
 
     .iManufacturer      = 0x01,  // string pointers
@@ -159,7 +159,7 @@ char const* string_desc_arr [] =
     (const char[]) { 0x09, 0x04 }, 	// 0: is supported language is English (0x0409)
     "WhaleyGroup",                   	// 1: Manufacturer
     "MicArray",              		      // 2: Product
-    "FW0.1.0-SN001",                  // 3: Serials
+    "FW0.2.1-SN005",                  // 3: Serials
     "UAC2",                 	 	      // 4: Audio Interface
 };
 
