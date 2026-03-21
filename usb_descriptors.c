@@ -159,7 +159,7 @@ char const* string_desc_arr [] =
     (const char[]) { 0x09, 0x04 }, 	// 0: is supported language is English (0x0409)
     "WhaleyGroup",                   	// 1: Manufacturer
     "MicArray",              		      // 2: Product
-    "0000005",                      	// 3: Serials, should use chip ID
+    "FW0.1.0-SN001",                  // 3: Serials
     "UAC2",                 	 	      // 4: Audio Interface
 };
 
