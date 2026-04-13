@@ -10,7 +10,7 @@ This C code and PIO code will accept I2S data from two MEMS microphones and crea
 - MEMS microphone interface is I2S with both outputs interleaved into one data path.
 - Target MEMS microphone is Invensense ICS-43434, 24 bits/sample.
 - Uses Raspberry Pi Pico RP2040 development board.
-- USB enumeration of HID interface providing MCU (environment) temperature which is important for acoustic beamforming.
+- USB enumeration of HID interface providing MCU (environment) temperature and microhpone separation distance which are important for acoustic beamforming calculations.
 
 
 ## Documentation
@@ -19,7 +19,7 @@ This C code and PIO code will accept I2S data from two MEMS microphones and crea
 
 ### Hardware
 The system can be constructed using a Raspberry Pi Pico development board and two MEMS microphone evaluation boards from Adafruit (Part #6049) as shown in the following diagram.
-![Connection Diagram for Dual Microphones](./pico_diagram.png)  Connection Diagram for Dual Microphones
+![Connection Diagram for Dual Microphones](./images/pico_diagram.png)  Connection Diagram for Dual Microphones
 
 
 ### Supported Boards
@@ -59,6 +59,16 @@ cmake .. -DBOARD=raspberry_pi_pico
 make
 ```
 which will produce a *.uf2 binary output file in the build folder.  Then follow the standard process to flash the file to the pico by plugging in the pico with the bool_sel button pressed, and copy the uf2 file to the pico folder which is mounted to the system.  After flashing, the pico will present both a standard audio streaming USB interface, and an HID interface.  The audio function can be tested using any recording application such as Audacity.  The hid_test.py script can be used to query the HID functions which returns the pico device temperature and a (hard coded) number representing the physical distance between microphones in the array.  In linux HID devices are owned by root by default and thus blocked from user access, so the simplest method to run the python script is to run as root.
+
+### Custom PCB
+A printed circuit board was designed for this system to support two microphones at a fixed spacing which is important for beamforming use.  KiCAD PCB files are included herein.  In this case the microphone access ports are 390 mm apart.
+![Custom PCB of two microphone sensor](./images/micarray_pcb_frontside.jpg)Custom PCB of two microphone sensor
+
+### Weather Tolerant Enclosure
+A mechanical cover for this circuit board was designed and built where almost the entire board is coated in polyurethane to allow for use outdoors for long term sensing.
+![MicArray sensor with polyurethane coating](./images/micarray_assy_frontside.JPG)MicArray sensor with polyurethane coating
+
+A 3D model was designed for the enclosure and was printed in SLS resin to serve as a form for generating a silicone mold.  The PCB is then placed in the finished mold and liquid polyurethane is poured in the mold to completely embed the PCB within the polyurethane except for the two small microphone access ports.  The microphone ports are angled at 45 degrees from vertical to ensure rainwater will not ingress into the ports.  A flat flexible USB cable was chosen to connect the microphone so that the cable may fit under a weather seal such as in a window frame or under a gasket in a sealed enclosure.  This allows the host computer to communicate with the microphones from a dry environment.
 
 
 ## License
