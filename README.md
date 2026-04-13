@@ -1,4 +1,4 @@
-# Micarray
+# MicArray
 Multichannel USB microphone for Raspbery Pi Pico for use in acoustic array beamforming.
 
 This C code and PIO code will accept I2S data from two MEMS microphones and create a USB 2.0 audio microphone source with two channels intially, and expandable to more channels in later versions.  The target MCU is the Raspberry Pi RP2040 on the Pico board and the target microphone is the Invensense ICS-43434 MEMS microphone with I2S interface.  The code supports the following features:
@@ -10,7 +10,7 @@ This C code and PIO code will accept I2S data from two MEMS microphones and crea
 - MEMS microphone interface is I2S with both outputs interleaved into one data path.
 - Target MEMS microphone is Invensense ICS-43434, 24 bits/sample.
 - Uses Raspberry Pi Pico RP2040 development board.
-- USB enumeration of HID interface providing MCU (environment) temperature and microhpone separation distance which are important for acoustic beamforming calculations.
+- USB enumeration of HID interface providing MCU (environment) temperature and microphone separation distance which are important for acoustic beamforming calculations.
 
 
 ## Documentation
